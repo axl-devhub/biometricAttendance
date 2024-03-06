@@ -1,0 +1,50 @@
+.fit-cover {
+  object-fit: cover;
+}
+
+@media (max-width: 1400px) {
+  .product-cards {
+    width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-cards {
+    width: auto;
+  }
+}
+
+.product-cards {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.product-cards .card-body {
+  height: 280.797px;
+}
+
+.list-group {
+  overflow-y: auto;
+}
+
+@media (min-width: 576px) {
+  input.bg-dark-subtle {
+    display: none;
+  }
+}
+
+@media (max-width: 300px) {
+  li > a.nav-link {
+    visibility: hidden;
+  }
+}
+
+.grade > .card {
+  margin: 0px 8px 16px 16px;
+  width: 30%;
+}
+
+.grade-cards > .col {
+  margin-bottom: 16px;
+}
+
