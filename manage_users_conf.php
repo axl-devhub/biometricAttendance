@@ -67,6 +67,7 @@ if (isset($_POST['Add'])) {
     $sexo = $_POST['sexo'];
     $tardanzas = $_POST['tardanzas'];
     $ausencias = $_POST['ausencias'];
+    $curso = (int)$_POST['curso'];
 
     //check if there any selected user
     $sql = "SELECT nombre FROM users WHERE fingerprint_select=1";
@@ -95,14 +96,14 @@ if (isset($_POST['Add'])) {
                         mysqli_stmt_execute($result);
                         $resultl = mysqli_stmt_get_result($result);
                         if (!$row = mysqli_fetch_assoc($resultl)) {
-                            $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, sexo=?, tardanzas=?, ausencias=?, user_date=CURDATE() WHERE fingerprint_select=1";
+                            $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, user_date=CURDATE() WHERE fingerprint_select=1";
                             $result = mysqli_stmt_init($conn);
                             if (!mysqli_stmt_prepare($result, $sql)) {
                                 echo "SQL_Error_select_Fingerprint";
                                 exit();
                             }
                             else{
-                                mysqli_stmt_bind_param($result, "ssssii", $nombre, $apellido, $matricula, $sexo, $tardanzas, $ausencias);
+                                mysqli_stmt_bind_param($result, "sssisii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias);
                                 mysqli_stmt_execute($result);
 
                                 echo json_encode(['success' => true, 'message' => "Se ha añadido un nuevo usuario"]);
@@ -180,7 +181,7 @@ if (isset($_POST['Add_fingerID'])) {
                             }
                             else{
                                 mysqli_stmt_execute($result);
-                                $sql = "INSERT INTO users (nombre, apellido, matricula, sexo, fingerprint_id, fingerprint_select, user_date, del_fingerid, add_fingerid) VALUES (?, ?, ?, ?, ?, 1, CURDATE(), 0, 1)";
+                                $sql = "INSERT INTO users (nombre, apellido, matricula, sexo, id_curso, fingerprint_id, fingerprint_select, user_date, del_fingerid, add_fingerid) VALUES (?, ?, ?, ?, 5, ?, 1, CURDATE(), 0, 1)";
                                 $result = mysqli_stmt_init($conn);
                                 if (!mysqli_stmt_prepare($result, $sql)) {
                                     echo json_encode(['error' => true, 'message' => 'SQL_Error']);
@@ -220,7 +221,7 @@ if (isset($_POST['Update'])) {
     $sexo = $_POST['sexo'];
     $tardanzas = $_POST['tardanzas'];
     $ausencias = $_POST['ausencias'];
-
+    $curso = (int)$_POST['curso'];
     //check if there any selected user
     $sql = "SELECT * FROM users WHERE fingerprint_select=1";
     $result = mysqli_stmt_init($conn);
@@ -244,7 +245,7 @@ if (isset($_POST['Update'])) {
                 }
                 else{
                     //check if there any user had already the Serial Number
-                    $sql = "SELECT matricula FROM users WHERE matricula=?";
+                    $sql = "SELECT matricula FROM users WHERE matricula=? AND fingerprint_select != 1";
                     $result = mysqli_stmt_init($conn);
                     if (!mysqli_stmt_prepare($result, $sql)) {
                         echo json_encode(['error' => true, 'message' => 'SQL_Error']);
@@ -258,14 +259,14 @@ if (isset($_POST['Update'])) {
 
                             if (!empty($nombre) && !empty($apellido) && !empty($matricula)) {
 
-                                $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, sexo=?, tardanzas=?, ausencias=? WHERE fingerprint_select=1";
+                                $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=? WHERE fingerprint_select=1";
                                 $result = mysqli_stmt_init($conn);
                                 if (!mysqli_stmt_prepare($result, $sql)) {
                                     echo json_encode(['error' => true, 'message' => "SQL_Error_select_Fingerprint"]);
                                     exit();
                                 }
                                 else{
-                                    mysqli_stmt_bind_param($result, "ssssii", $nombre, $apellido, $matricula, $sexo, $tardanzas, $ausencias);
+                                    mysqli_stmt_bind_param($result, "sssisii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias);
                                     mysqli_stmt_execute($result);
 
                                     echo json_encode(['success' => true, 'message' => "El usuario seleccionado ha sido actualizado!"]);

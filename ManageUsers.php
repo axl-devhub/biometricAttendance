@@ -1,5 +1,15 @@
 <?php 
 $_SESSION['current_page'] = "registrar_estudiante";
+
+include 'connectDB.php';
+
+$sql = "SELECT id, grado, curso FROM cursos";
+$result = mysqli_query($conn, $sql);
+
+$courses = array();
+while ($row = mysqli_fetch_assoc($result)) {
+    $courses[] = $row;
+}
 include'header.php';
 ?>
 <script src="https://code.jquery.com/jquery-3.3.1.js"
@@ -7,7 +17,7 @@ include'header.php';
         crossorigin="anonymous">
 </script>
 <script src="js/jquery-2.2.3.min.js"></script>
-<script src="js/manage_users_1.js"></script>
+<script src="js/manage_users_2.js"></script>
 <div id="content" style="margin-left: 0;">
     <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
         <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>
@@ -46,7 +56,6 @@ include'header.php';
                             <table class="table table-hover">
                                 <thead>
                                     <tr >
-                                        <th>#</th>
                                         <th>FPUID</th>
                                         <th>Matricula</th>
                                         <th>Nombre</th>
@@ -117,8 +126,11 @@ include'header.php';
                                     </div>
                                     <div class="mb-3" style="margin-bottom: 0px;">
                                         <select class="form-select" required name="curso" id="curso">
-                                                <option value="1" selected="">5to E</option>
-                                                <option value="">6to E</option>
+                                            <?php
+                                                foreach ($courses as $course) {
+                                                    echo "<option value=" . $course['id'] . ">". $course['grado'] . " " . $course['curso'] . "</option>";
+                                                }
+                                            ?>
                                         </select>
                                     </div>
                                 </div>

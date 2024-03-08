@@ -49,13 +49,13 @@ if(isset($_POST["To_Excel"])){
               }
               $output .= '</table>';
               header('Content-Type: application/xls');
-              header('Content-Disposition: attachment; filename=User_Log'.$Log_date.'.xls');
+              header('Content-Disposition: attachment; filename=Asistencia'.$Log_date.'.xls');
               
               echo $output;
               exit();
         }
         else{
-            header( "location: UsersLog.php" );
+            header( "location: index.php" );
             exit();
         }
 }

@@ -5,9 +5,11 @@
 ?> 
 
 <script src="js/user_log_2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
 <script>
     $(document).ready(function() {
-        let today = new Date().toISOString().split('T')[0];
+        let today = moment().tz("America/Santo_Domingo").format('YYYY-MM-DD');
         $('#date_sel').val(today);
         $('#dataTable').css('opacity', 0.5);
 
@@ -35,31 +37,57 @@
           }
         });
     });
-      $(document).ready(function(){
-      $.ajax({
-        url: "user_log_up.php",
-        type: 'POST',
-        data: {
-            'select_date': 1,
-        }
-      });
-      setInterval(function(){
+    $(document).ready(function(){
     $.ajax({
-        url: "user_log_up.php",
-        type: 'POST',
-        data: {
-            'select_date': 0,
-        },
-        success: function(data) {
-            $('#usersLog').html(data);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error("AJAX error: " + textStatus + ' : ' + errorThrown);
-        }
+    url: "user_log_up.php",
+    type: 'POST',
+    data: {
+        'select_date': 1,
+    }
     });
-},3000);
+    var intervalId;
+
+    function startInterval() {
+        intervalId = setInterval(function() {
+            $.ajax({
+                url: "user_log_up.php",
+                type: 'POST',
+                data: {
+                    'select_date': 0,
+                },
+                success: function(data) {
+                    $('#usersLog').html(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("AJAX error: " + textStatus + ' : ' + errorThrown);
+                }
+            });
+        }, 5000);
+    }
+
+    function stopInterval() {
+        clearInterval(intervalId);
+    }
+
+    // Start the interval when the page loads
+    startInterval();
+
+    // Stop the interval when the search bar gains focus
+    $('#dataTableFilter').focus(stopInterval);
+
+    // Start the interval when the search bar loses focus
+    $('#dataTableFilter').blur(startInterval);
+    $(document).ready(function(){
+    $("#dataTableFilter").on("keyup", function() {
+        var value = $(this).val().toUpperCase();
+        $("#dataTable tr").filter(function() {
+        $(this).toggle($(this).text().toUpperCase().indexOf(value) > -1)
+        });
+    });
   });
+});
 </script>
+
 
 <div id="content" style="margin-left: 0;">
                 <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
@@ -78,17 +106,21 @@
                         <div class="card-header py-3">
                             <div class="row">
                                 <div class="col d-flex flex-row justify-content-xxl-start">
-                                    <form class="d-inline-block">
-                                        <a class="btn btn-primary btn-icon-split" role="button">
-                                            <span class="text-white-50 icon">
-                                                <i class="fas fa-angle-double-down"></i>
-                                            </span>
-                                            <span class="text-white text">Exportar excel</span>
-                                        </a>
+                                    <form  method="POST" action="Export_Excel.php" style="display: flex; width: 100%;">
+                                        <div class="d-inline-block">
+                                            <button class="btn btn-primary btn-icon-split" role="button" name="To_Excel" type="submit">
+                                                <span class="text-white-50 icon">
+                                                    <i class="fas fa-angle-double-down"></i>
+                                                </span>
+                                                <span class="text-white text">
+                                                    Exportar excel
+                                                </span>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex ms-auto">
+                                            <input type="date" name="date_sel" id="date_sel"/>
+                                        </div>
                                     </form>
-                                    <div class="d-flex ms-auto">
-                                        <input type="date" name="date_sel" id="date_sel"/>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -105,7 +137,7 @@
                                             </select></label></div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div id="dataTable_filter-2" class="text-md-end dataTables_filter"><label class="form-label"><input class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Buscar por matricula" /></label></div>
+                                    <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input id="dataTableFilter" class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Buscar por matricula" /></label></div>
                                 </div>
                             </div>
                             <div class="jumbotron-container" id="noAsistanceMessage" style="display: none;"> 

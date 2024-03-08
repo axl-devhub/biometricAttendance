@@ -63,7 +63,7 @@ if (isset($_GET['FingerID'])) {
                             $current_time = date('H:i:s', strtotime('now'));
                         
                             // Check if the current time is later than 7:40 AM
-                            if ($current_time > '07:40:00') {
+                            if ($current_time > '7:40:00') {
                                 // Prepare the SQL statement to increment the tardanzas field
                                 $sql_tardanzas = "UPDATE users SET tardanzas = tardanzas + 1 WHERE fingerprint_id = ?";
                                 $result_tardanzas = mysqli_stmt_init($conn);
