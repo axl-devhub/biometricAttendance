@@ -68,7 +68,7 @@ if (isset($_POST['Add'])) {
     $tardanzas = $_POST['tardanzas'];
     $ausencias = $_POST['ausencias'];
     $curso = (int)$_POST['curso'];
-    $maestro = $_POST['maestro']
+    $maestro = $_POST['maestro'];
 
     //check if there any selected user
     $sql = "SELECT nombre FROM users WHERE fingerprint_select=1";
