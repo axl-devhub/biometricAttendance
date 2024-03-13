@@ -1,12 +1,14 @@
 $(document).ready(() => {
-  $('#date_sel').on('change', function() {
-    var selectedDate = $(this).val();
+  $('#date_sel, #date_sel_to').on('change', function() {
+    var selectedDate = $('#date_sel').val();
+    var selectedDateTo = $('#date_sel_to').val();
     $('#dataTable').css('opacity', 0.5);
     $.ajax({
         url: 'user_log_up.php',
         type: 'POST',
         data: {
             'date_sel': selectedDate,
+            'date_sel_to': selectedDateTo,
             'log_date': 1,
         },
         success: function(response){
@@ -16,6 +18,7 @@ $(document).ready(() => {
             data: {
               'log_date': 1,
               'date_sel': selectedDate,
+              'date_sel_to': selectedDateTo,
               'select_date': 0,
             }
             }).done(function(data) {

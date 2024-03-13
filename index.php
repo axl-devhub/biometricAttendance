@@ -4,21 +4,23 @@
   include'header.php'; 
 ?> 
 
-<script src="js/user_log_2.js"></script>
+<script src="js/user_log_3.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
 <script>
     $(document).ready(function() {
         let today = moment().tz("America/Santo_Domingo").format('YYYY-MM-DD');
-        $('#date_sel').val(today);
+        $('#date_sel_to').val(today);
         $('#dataTable').css('opacity', 0.5);
 
-        let selectedDate = $('#date_sel').val();
+
+        let selectedDateTo = $('#date_sel_to').val();
       $.ajax({
           url: 'user_log_up.php',
           type: 'POST',
           data: {
-              'date_sel': selectedDate,
+              'date_sel': selectedDateTo,
+              'date_sel_to': selectedDateTo,
               'log_date': 1,
           },
           success: function(response){
@@ -27,7 +29,8 @@
               type: 'POST',
               data: {
                 'log_date': 1,
-                'date_sel': selectedDate,
+                'date_sel': selectedDateTo,
+                'date_sel_to': selectedDateTo,
                 'select_date': 0,
               }
               }).done(function(data) {
@@ -76,7 +79,10 @@
     $('#dataTableFilter').focus(stopInterval);
 
     // Start the interval when the search bar loses focus
-    $('#dataTableFilter').blur(startInterval);
+    $('#dataTableFilter').blur(setTimeout(() => {
+        startInterval()
+    }), 100000
+    );
     $(document).ready(function(){
     $("#dataTableFilter").on("keyup", function() {
         var value = $(this).val().toUpperCase();
@@ -86,6 +92,12 @@
     });
   });
 });
+
+$(document).ready(function() {
+    var today = new Date().toISOString().split('T')[0];
+    $('#date_sel').attr('max', today);
+    $('#date_sel_to').attr('max', today);
+    });
 </script>
 
 
@@ -105,9 +117,9 @@
                     <div class="card shadow">
                         <div class="card-header py-3">
                             <div class="row">
-                                <div class="col d-flex flex-row justify-content-xxl-start">
-                                    <form  method="POST" action="Export_Excel.php" style="display: flex; width: 100%;">
-                                        <div class="d-inline-block">
+                                <div class="col d-block">
+                                    <div>
+                                        <form class="d-inline-block" method="POST" action="Export_Excel.php">
                                             <button class="btn btn-primary btn-icon-split" role="button" name="To_Excel" type="submit">
                                                 <span class="text-white-50 icon">
                                                     <i class="fas fa-angle-double-down"></i>
@@ -116,35 +128,36 @@
                                                     Exportar excel
                                                 </span>
                                             </button>
+                                        </form>
+                                        <div class="d-flex float-end flex-row" style="height: 39px;">
+                                            <div class="d-flex" style="margin-right: 24px;">
+                                                <p style="margin-top: 6px;margin-right: 6px;font-size: 18px;">Desde:</p>
+                                                <input type="date" name="date_sel" id="date_sel"  />
+                                            </div>
+                                            <div class="d-flex">
+                                                <p style="margin-top: 6px;margin-right: 6px;font-size: 18px;">Hasta:</p>
+                                                <input type="date" name="date_sel_to" id="date_sel_to"/>
+                                            </div>
                                         </div>
-                                        <div class="d-flex ms-auto">
-                                            <input type="date" name="date_sel" id="date_sel"/>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body" style="max-height: 800px;">
+                        <div class="d-flex align-items-center" style="max-width: 400px;">
+                                        <div class="input-group mb-3 align-self-center ">
+                                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="filter_by_dropdown" selected_value="1">Buscar por:</button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" value="2">Nombre</a></li>
+                                                    <li><a class="dropdown-item" href="#" value="1">Matricula</a></li>
+                                                    <li><a class="dropdown-item" href="#" value="3">Curso</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                </ul>
+                                            <input type="text" class="form-control" id="dataTableFilter" aria-label="Text input with dropdown button" placeholder="Buscar..." >
+                                        </div>
+                                    </div>
                             <div class="row">
                                 <div class="col-md-6 text-nowrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Mostrar 
-                                            <select id="dateFilter" class="d-inline-block form-select form-select-sm">
-                                                <option value="currentDate" selected>Hoy</option>
-                                                <option value="currenWeek">Esta semana</option>
-                                                <option value="currentMonth">Este mes</option>
-                                                <option value="all">Todos</option>
-                                            </select></label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input id="dataTableFilter" class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Buscar por matricula" /></label></div>
-                                </div>
-                            </div>
-                            <div class="jumbotron-container" id="noAsistanceMessage" style="display: none;"> 
-                                <div class="jumbotron"> 
-                                    <h1 class="display-4 cool-fonted">There are no products to show my friend</h1> 
-                                    <hr class="my-4"> 
-                                    <p class="lead align-center">Add one above to get started</p> 
                                 </div> 
                             </div>
                             <div id="dataTable-1" class="table-responsive table-responsive-sm mt-1" role="grid" aria-describedby="dataTable_info" style="max-height: 500px;">
@@ -154,6 +167,7 @@
                                             <th>Matricula</th>
                                             <th>Nombre</th>
                                             <th>Curso</th>
+                                            <th>Fecha</th>
                                             <th>Hora-llegada</th>
                                             <th>Hora-salida</th>
                                             <th>Tardanzas</th>
@@ -167,6 +181,7 @@
                                             <td><strong>Matricula</strong></td>
                                             <td><strong>Nombre</strong></td>
                                             <td><strong>Curso</strong></td>
+                                            <th>Fecha</th>
                                             <td><strong>Hora-llegada</strong></td>
                                             <td><strong>Hora-salida</strong></td>
                                             <td><strong>Tardanzas</strong></td>

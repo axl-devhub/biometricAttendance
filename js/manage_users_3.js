@@ -30,6 +30,8 @@ function restoreInputs(){
   $('#sexo').val('');
   $('#tardanzas').val('');
   $('#ausencias').val('');
+  $('#curso').val('');
+  $('#maestro').val('');
 }
 
 function fetchTable(){
@@ -106,6 +108,7 @@ $(document).ready(function(){
     var tardanzas = $('#tardanzas').val();
     var ausencias = $('#ausencias').val();
     var curso = $('#curso').val();
+    var isMaestro = $('#maestro').val();
     
 
     $.ajax({
@@ -120,6 +123,7 @@ $(document).ready(function(){
         'tardanzas': tardanzas,
         'ausencias': ausencias,
         'curso': curso,
+        'maestro': isMaestro
       },
       success: function(response){
         restoreInputs();
@@ -198,6 +202,8 @@ $(document).ready(function(){
     var tardanzas = $('#tardanzas').val();
     var ausencias = $('#ausencias').val();
     var curso = $('#curso').val();
+    var isMaestro = $('#maestro').val();
+
     $.ajax({
       url: 'manage_users_conf.php',
       type: 'POST',
@@ -210,6 +216,7 @@ $(document).ready(function(){
         'tardanzas': tardanzas,
         'ausencias': ausencias,
         'curso': curso,
+        'maestro': isMaestro
       },
       success: function(response){
         let responseObject = JSON.parse(response);

@@ -6,22 +6,26 @@ session_start();
       require'connectDB.php';
 
       if (isset($_POST['log_date'])) {
-        if ($_POST['date_sel'] != 0) {
+        if ($_POST['date_sel'] != 0 && $_POST['date_sel_to'] != 0) {
             $_SESSION['seldate'] = $_POST['date_sel'];
+            $_SESSION['seldate_to'] = $_POST['date_sel_to'];
         }
         else{
             $_SESSION['seldate'] = date("Y-m-d");
+            $_SESSION['seldate_to'] = date("Y-m-d");
         }
       }
       
       if ($_POST['select_date'] == 1) {
           $_SESSION['seldate'] = date("Y-m-d");
+          $_SESSION['seldate_to'] = date("Y-m-d");
       }
-      else if ($_POST['select_date'] == 0) {
+      else if ($_POST['select_date'] == 0 ) {
           $seldate = $_SESSION['seldate'];
+          $seldate_to = $_SESSION['seldate_to'];
       }
 
-      $sql = "SELECT * FROM users_logs WHERE checkindate='$seldate' ORDER BY id DESC";
+      $sql = "SELECT * FROM users_logs WHERE checkindate BETWEEN '$seldate' AND '$seldate_to' ORDER BY id DESC";
       $result = mysqli_stmt_init($conn);
       if (!mysqli_stmt_prepare($result, $sql)) {
           echo '<p class="error">SQL Error</p>';
@@ -36,6 +40,7 @@ session_start();
                     <TD><?php echo $row['matricula'];?></TD>
                     <TD><?php echo $row['nombre'] . " " . $row['apellido'];?></TD>
                     <TD><?php echo $row['curso'];?></TD>
+                    <TD><?php echo $row['checkindate'];?></TD>
                     <TD><?php echo $row['hora_llegada'];?></TD>
                     <TD><?php echo $row['hora_salida'];?></TD>
                     <TD><?php echo $row['tardanzas'];?></TD>

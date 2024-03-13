@@ -38,14 +38,6 @@
                                     <span>Cursos</span>
                                 </a>
                             </div>
-                            <div class="disabled">
-                                <a class="nav-link disabled" href="#">
-                                    <div class="sb-nav-link-icon">
-                                        <i class="fa fa-user-circle"></i>
-                                    </div>
-                                    <span style="color:#171516"><strike>Docentes</strike></span>
-                                </a>
-                            </div>
                             <div>
                                 <a class="nav-link collapsed <?php if ($_SESSION['current_page'] == "registrar_estudiante" || $_SESSION['current_page'] == "registrar_maestro" ) echo "active"?>" href="#" aria-expanded="false" aria-controls="collapse2" data-bs-toggle="collapse" data-bs-target="#collapseLayouts-1">
                                     <div class="sb-nav-link-icon">
