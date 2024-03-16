@@ -30,8 +30,8 @@ function restoreInputs(){
   $('#sexo').val('');
   $('#tardanzas').val('');
   $('#ausencias').val('');
-  $('#curso').val('');
-  $('#maestro').val('');
+  $('#curso').val('');   
+  $('#maestro').prop('checked', false);
 }
 
 function fetchTable(){
@@ -108,7 +108,7 @@ $(document).ready(function(){
     var tardanzas = $('#tardanzas').val();
     var ausencias = $('#ausencias').val();
     var curso = $('#curso').val();
-    var isMaestro = $('#maestro').val();
+    var isMaestro = $('#maestro').is(':checked') ? 1 : 0;
     
 
     $.ajax({
@@ -202,7 +202,7 @@ $(document).ready(function(){
     var tardanzas = $('#tardanzas').val();
     var ausencias = $('#ausencias').val();
     var curso = $('#curso').val();
-    var isMaestro = $('#maestro').val();
+    var isMaestro = $('#maestro').is(':checked') ? 1 : 0;
 
     $.ajax({
       url: 'manage_users_conf.php',
@@ -315,6 +315,7 @@ $(document).ready(function(){
               const user = response;
               buttonState.setUpdate();
               deleteButton.createButton();
+              restoreInputs();
               $('#nombre').val(user.nombre);
               $('#apellido').val(user.apellido);
               $('#matricula').val(user.matricula);
@@ -325,9 +326,21 @@ $(document).ready(function(){
               else if (user.sexo == 'Femenino') {
                 $('#female').prop('checked', true);
               }
+
+              if (parseInt(user.maestro)){
+                $('#maestro').prop('checked', true);
+              }
+
+              $('#curso option').each(function(){
+                if (this.value == user.id_curso) {
+                    $(this).prop('selected', true); // Selects the option
+                    return false; // breaks the loop
+                }
+            });
  
               $('#tardanzas').val(user.tardanzas);
               $('#ausencias').val(user.ausencias);
+
               
               enableInputs();
 

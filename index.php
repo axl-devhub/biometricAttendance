@@ -97,6 +97,11 @@ $(document).ready(function() {
     var today = new Date().toISOString().split('T')[0];
     $('#date_sel').attr('max', today);
     $('#date_sel_to').attr('max', today);
+
+    $('#filter_by_dropdown li').click(function() {
+             var selectedText = $(this).text();
+            $('#filter_by_dropdown').prev().text(selectedText);
+        });
     });
 </script>
 
@@ -151,7 +156,6 @@ $(document).ready(function() {
                                                     <li><a class="dropdown-item" href="#" value="2">Nombre</a></li>
                                                     <li><a class="dropdown-item" href="#" value="1">Matricula</a></li>
                                                     <li><a class="dropdown-item" href="#" value="3">Curso</a></li>
-                                                    <li><hr class="dropdown-divider"></li>
                                                 </ul>
                                             <input type="text" class="form-control" id="dataTableFilter" aria-label="Text input with dropdown button" placeholder="Buscar..." >
                                         </div>

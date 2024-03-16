@@ -41,7 +41,7 @@ if (isset($_GET['FingerID'])) {
                     mysqli_stmt_execute($result);
                     $resultl = mysqli_stmt_get_result($result);
                     if ($row = mysqli_fetch_assoc($resultl)){
-                        if (!empty($row['hora_salida'])) {
+                        if ($row['hora_salida'] != "00:00:00") {
                             echo "logout"."Ya se      registro ";
                             exit();
                         }
@@ -82,20 +82,19 @@ if (isset($_GET['FingerID'])) {
                                 } else {
                                     mysqli_stmt_bind_param($result_tardanzas, "i", $fingerID);
                                     mysqli_stmt_execute($result_tardanzas);
-                                    $sqlInertIntoLog = "INSERT INTO tardanzas_logs(id_usuario, tardanza) VALUES(?, ?)";
+                                    
+                                    $sqlInertIntoLog = "INSERT INTO tardanzas_log (id_usuario, fecha, tardanza) VALUES (?, CURDATE(), ?)";
                                     $resultInertIntoLog = mysqli_stmt_init($conn);
                                     if (!mysqli_stmt_prepare($resultInertIntoLog, $sqlInertIntoLog)) {
                                         echo "SQL_Error_Insert_tardanzas_logs";
                                         exit();
                                     } else {
                                         $tardanza = $tardanzas + 1;
-                                        mysqli_stmt_bind_param($resultInertIntoLog, "is", $id, $tardanza);
+                                        mysqli_stmt_bind_param($resultInertIntoLog, "ii", $id, $tardanza);
                                         mysqli_stmt_execute($resultInertIntoLog);
                                         $matricula = $matricula . "  Tardanza";
                                     }
-                                    $matricula = $matricula . "  Tardanza";
                                 }
-
                             }
                         
                             echo "login".$matricula;

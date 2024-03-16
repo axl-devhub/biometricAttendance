@@ -17,7 +17,7 @@ include'header.php';
         crossorigin="anonymous">
 </script>
 <script src="js/jquery-2.2.3.min.js"></script>
-<script src="js/manage_users_2.js"></script>
+<script src="js/manage_users_3.js"></script>
 <div id="content" style="margin-left: 0;">
     <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
         <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>

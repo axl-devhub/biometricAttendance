@@ -51,7 +51,6 @@
                                 <div id="collapseLayouts-1" class="collapse" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                                     <div class="sb-sidenav-menu-nested nav">
                                         <a class="nav-link <?php if ($_SESSION['current_page'] == "registrar_estudiante") echo "active" ?>" href="ManageUsers.php">+ Registrar estudiante</a>
-                                        <a class="nav-link disabled <?php if ($_SESSION['current_page'] == "registrar_maestro") echo "active" ?>" style="color:#    " href="#"><strike>+ Registrar docente</strike></a>
                                     </div>
                                 </div>
                             </div>
