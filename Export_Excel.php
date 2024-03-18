@@ -6,15 +6,15 @@ $output = '';
 
 if(isset($_POST["To_Excel"])){
   
-    if ( empty($_POST['date_sel'])) {
-
+    if ( empty($_POST['date_sel']) && empty($_POST['date_sel_to'])) {
         $Log_date = date("Y-m-d");
+        $Log_date_to = date("Y-m-d");
     }
-    else if ( !empty($_POST['date_sel'])) {
-
+    else if ( !empty($_POST['date_sel']) && empty($_POST['date_sel_to'])) {
         $Log_date = $_POST['date_sel']; 
+        $Log_date_to = $_POST['date_sel_to'];
     }
-        $sql = "SELECT * FROM users_logs WHERE checkindate='$Log_date' ORDER BY id DESC";
+        $sql = "SELECT * FROM users_logs WHERE checkindate='?' ORDER BY id DESC";
         $result = mysqli_query($conn, $sql);
         if($result->num_rows > 0){
             $output .= '
@@ -55,7 +55,7 @@ if(isset($_POST["To_Excel"])){
               exit();
         }
         else{
-            header( "location: index.php" );
+            header( "location: asistencia.php" );
             exit();
         }
 }

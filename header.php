@@ -25,6 +25,22 @@
                         <div>
                                 <a class="nav-link <?php if ($_SESSION['current_page'] == "index") echo "active" ?>" href="index.php">
                                     <div class="sb-nav-link-icon">
+                                        <i class="fa fa-chart-line"></i>
+                                    </div>
+                                    <span>Analiticas</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a class="nav-link <?php if ($_SESSION['current_page'] == "usuarios") echo "active" ?>" href="usuarios.php">
+                                    <div class="sb-nav-link-icon">
+                                        <i class="fa fa-user"></i>
+                                    </div>
+                                    <span>Usuarios</span>
+                                </a>
+                            </div>
+                        <div>
+                                <a class="nav-link <?php if ($_SESSION['current_page'] == "asistencia") echo "active" ?>" href="asistencia.php">
+                                    <div class="sb-nav-link-icon">
                                         <i class="fa fa-table"></i>
                                     </div>
                                     <span>Asistencia</span>
@@ -66,5 +82,33 @@
             </div>
         </div>
         <div class="d-flex flex-column" id="content-wrapper">
+        <div id="content" style="margin-left: 0;">
+        <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
+    <div class="container-fluid"><button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle me-3" type="button"><i class="fas fa-bars"></i></button>
+        <ul class="navbar-nav flex-nowrap ms-auto">
+            <li class="nav-item dropdown no-arrow mx-1">
+                <div class="nav-item dropdown show no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="true" data-bs-toggle="dropdown" href="#"><span class="badge bg-danger badge-counter">1</span><i class="fas fa-bell text-light-emphasis fa-fw"></i></a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in" data-bs-popper="none" data-bs-theme="light">
+                        <h6 class="dropdown-header">Notificaciones del sistema</h6><a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="me-3">
+                                <div class="bg-primary icon-circle"><i class="fas fa-file-alt text-white"></i></div>
+                            </div>
+                            <div><span class="small text-gray-500">10 de Enero de 2024</span>
+                                <p>Juan Eleazar de 5TO E ha llegado a las 4 tardanzas!<br /><br />Generar carta de advertencia?</p>
+                            </div>
+                        </a><a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+                    </div>
+                </div>
+            </li>
+            <li class="nav-item dropdown no-arrow mx-1">
+                <div class="shadow dropdown-list dropdown-menu dropdown-menu-end" aria-labelledby="alertsDropdown"></div>
+            </li>
+            <div class="d-none d-sm-block topbar-divider"></div>
+            <li class="nav-item no-arrow"><a class="nav-link nav-link active" href="profile.php">
+                    <div class="sb-nav-link-icon"><img class="border rounded-circle img-profile" src="./assets/img/asinyx_logo.svg" width="49" height="49" /></div><span>  Usuario</span>
+                </a></li>
+        </ul>
+        </div>
+    </nav>
         <script src="js/jquery-2.2.3.min.js"></script>
 	

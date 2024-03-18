@@ -17,20 +17,6 @@
 
   include'header.php'; 
 ?> 
-
-
-
-<div id="content" style="margin-left: 0;">
-                <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
-                    <div class="container-fluid">
-                        <button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button" bs-><i class="fas fa-bars"></i></button>
-                        <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item no-arrow"><a class="nav-link nav-link active" href="#">
-                                    <div class="sb-nav-link-icon"><img class="border rounded-circle img-profile" src="assets/img/Asinyx%20logo.svg" width="49" height="49"></div><span>&nbsp; Usuario</span>
-                                </a></li>
-                        </ul>
-                    </div>
-                </nav>
                 <div class="container-fluid">
                     <h3 class="text-dark mb-4">Asistencia</h3>
 <div class="card shadow" style="margin-bottom: 32px;">

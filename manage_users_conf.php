@@ -97,6 +97,22 @@ if (isset($_POST['Add'])) {
                         mysqli_stmt_execute($result);
                         $resultl = mysqli_stmt_get_result($result);
                         if (!$row = mysqli_fetch_assoc($resultl)) {
+                            $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=?";
+                            $result = mysqli_stmt_init($conn);
+                            if (!mysqli_stmt_prepare($result, $sql)) {
+                                echo "SQL_Error";
+                                exit();
+                            }
+                            else{
+                                mysqli_stmt_bind_param($result, "ii", $curso, $maestro);
+                                mysqli_stmt_execute($result);
+                                $resultl = mysqli_stmt_get_result($result);
+                                $row = mysqli_fetch_assoc($resultl);
+                                if ($row['count']) {
+                                    echo json_encode(['error' => true, 'message' => "Ya existe un maestro encargado para ese curso"]);
+                                    exit();
+                                }
+                            }
                             $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, maestro=?, user_date=CURDATE() WHERE fingerprint_select=1";
                             $result = mysqli_stmt_init($conn);
                             if (!mysqli_stmt_prepare($result, $sql)) {
@@ -104,7 +120,7 @@ if (isset($_POST['Add'])) {
                                 exit();
                             }
                             else{
-                                mysqli_stmt_bind_param($result, "sssisii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias, $maestro);
+                                mysqli_stmt_bind_param($result, "sssisiii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias, $maestro);
                                 mysqli_stmt_execute($result);
 
                                 echo json_encode(['success' => true, 'message' => "Se ha añadido un nuevo usuario"]);
@@ -261,7 +277,22 @@ if (isset($_POST['Update'])) {
                         if (!$row = mysqli_fetch_assoc($resultl)) {
 
                             if (!empty($nombre) && !empty($apellido) && !empty($matricula)) {
-
+                                $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=?";
+                                $result = mysqli_stmt_init($conn);
+                                if (!mysqli_stmt_prepare($result, $sql)) {
+                                    echo "SQL_Error";
+                                    exit();
+                                }
+                                else{
+                                    mysqli_stmt_bind_param($result, "ii", $curso, $maestro);
+                                    mysqli_stmt_execute($result);
+                                    $resultl = mysqli_stmt_get_result($result);
+                                    $row = mysqli_fetch_assoc($resultl);
+                                    if ($row['count']) {
+                                        echo json_encode(['error' => true, 'message' => "Ya existe un maestro encargado para ese curso"]);
+                                        exit();
+                                    }
+                                }
                                 $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, maestro=? WHERE fingerprint_select=1";
                                 $result = mysqli_stmt_init($conn);
                                 if (!mysqli_stmt_prepare($result, $sql)) {

@@ -1,203 +1,131 @@
-<?php 
-  session_start();
-  $_SESSION['current_page'] = "index";
-  include'header.php'; 
-?> 
-
-<script src="js/user_log_3.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
-<script>
-    $(document).ready(function() {
-        let today = moment().tz("America/Santo_Domingo").format('YYYY-MM-DD');
-        $('#date_sel_to').val(today);
-        $('#dataTable').css('opacity', 0.5);
-
-
-        let selectedDateTo = $('#date_sel_to').val();
-      $.ajax({
-          url: 'user_log_up.php',
-          type: 'POST',
-          data: {
-              'date_sel': selectedDateTo,
-              'date_sel_to': selectedDateTo,
-              'log_date': 1,
-          },
-          success: function(response){
-            $.ajax({
-              url: "user_log_up.php",
-              type: 'POST',
-              data: {
-                'log_date': 1,
-                'date_sel': selectedDateTo,
-                'date_sel_to': selectedDateTo,
-                'select_date': 0,
-              }
-              }).done(function(data) {
-              $('#dataTable').css('opacity', 1); 
-              $('#usersLog').html(data);
-            });
-          }
-        });
-    });
-    $(document).ready(function(){
-    $.ajax({
-    url: "user_log_up.php",
-    type: 'POST',
-    data: {
-        'select_date': 1,
-    }
-    });
-    var intervalId;
-
-    function startInterval() {
-        intervalId = setInterval(function() {
-            $.ajax({
-                url: "user_log_up.php",
-                type: 'POST',
-                data: {
-                    'select_date': 0,
-                },
-                success: function(data) {
-                    $('#usersLog').html(data);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.error("AJAX error: " + textStatus + ' : ' + errorThrown);
-                }
-            });
-        }, 5000);
-    }
-
-    function stopInterval() {
-        clearInterval(intervalId);
-    }
-
-    // Start the interval when the page loads
-    startInterval();
-
-    // Stop the interval when the search bar gains focus
-    $('#dataTableFilter').focus(stopInterval);
-
-    // Start the interval when the search bar loses focus
-    $('#dataTableFilter').blur(setTimeout(() => {
-        startInterval()
-    }), 100000
-    );
-    $(document).ready(function(){
-    $("#dataTableFilter").on("keyup", function() {
-        var value = $(this).val().toUpperCase();
-        $("#dataTable tr").filter(function() {
-        $(this).toggle($(this).text().toUpperCase().indexOf(value) > -1)
-        });
-    });
-  });
-});
-
-$(document).ready(function() {
-    var today = new Date().toISOString().split('T')[0];
-    $('#date_sel').attr('max', today);
-    $('#date_sel_to').attr('max', today);
-
-    $('#filter_by_dropdown li').click(function() {
-             var selectedText = $(this).text();
-            $('#filter_by_dropdown').prev().text(selectedText);
-        });
-    });
-</script>
-
-
-<div id="content" style="margin-left: 0;">
-                <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
-                    <div class="container-fluid">
-                        <button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button" bs-><i class="fas fa-bars"></i></button>
-                        <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item no-arrow"><a class="nav-link nav-link active" href="#">
-                                    <div class="sb-nav-link-icon"><img class="border rounded-circle img-profile" src="assets/img/Asinyx%20logo.svg" width="49" height="49"></div><span>&nbsp; Usuario</span>
-                                </a></li>
-                        </ul>
-                    </div>
-                </nav>
-                <div class="container-fluid">
-                    <h3 class="text-dark mb-4">Asistencia</h3>
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <div class="row">
-                                <div class="col d-block">
-                                    <div>
-                                        <form class="d-inline-block" method="POST" action="Export_Excel.php">
-                                            <button class="btn btn-primary btn-icon-split" role="button" name="To_Excel" type="submit">
-                                                <span class="text-white-50 icon">
-                                                    <i class="fas fa-angle-double-down"></i>
-                                                </span>
-                                                <span class="text-white text">
-                                                    Exportar excel
-                                                </span>
-                                            </button>
-                                        </form>
-                                        <div class="d-flex float-end flex-row" style="height: 39px;">
-                                            <div class="d-flex" style="margin-right: 24px;">
-                                                <p style="margin-top: 6px;margin-right: 6px;font-size: 18px;">Desde:</p>
-                                                <input type="date" name="date_sel" id="date_sel"  />
-                                            </div>
-                                            <div class="d-flex">
-                                                <p style="margin-top: 6px;margin-right: 6px;font-size: 18px;">Hasta:</p>
-                                                <input type="date" name="date_sel_to" id="date_sel_to"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<?php
+$_SESSION['current_page'] = "index";
+include 'header.php';
+?>
+<style>
+    .dashboard-icon {
+  color: rgb(54,55,58);
+}
+</style>
+<div class="container-fluid">
+    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-dark mb-0">Dashboard</h3>
+        <div class="dropdown"><button class="btn btn-dark dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Descargar Reporte&nbsp;</button>
+            <div class="dropdown-menu" style="max-height: 200px;overflow-y: auto;"><a class="dropdown-item" href="#">2023-2024 - Actual</a><a class="dropdown-item" href="#">2022-2023</a><a class="dropdown-item" href="#">2021-2022</a></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-xl-3 mb-4">
+            <div class="card shadow border-start-primary py-2">
+                <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de estudiantes inscritos en ITESA durante este año lectivo">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col me-2">
+                            <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Total estudiantes</span></div>
+                            <div class="text-dark fw-bold h5 mb-0"><span>225</span></div>
                         </div>
-                        <div class="card-body" style="max-height: 800px;">
-                        <div class="d-flex align-items-center" style="max-width: 400px;">
-                                        <div class="input-group mb-3 align-self-center ">
-                                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="filter_by_dropdown" selected_value="1">Buscar por:</button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" value="2">Nombre</a></li>
-                                                    <li><a class="dropdown-item" href="#" value="1">Matricula</a></li>
-                                                    <li><a class="dropdown-item" href="#" value="3">Curso</a></li>
-                                                </ul>
-                                            <input type="text" class="form-control" id="dataTableFilter" aria-label="Text input with dropdown button" placeholder="Buscar..." >
-                                        </div>
-                                    </div>
-                            <div class="row">
-                                <div class="col-md-6 text-nowrap">
-                                </div> 
-                            </div>
-                            <div id="dataTable-1" class="table-responsive table-responsive-sm mt-1" role="grid" aria-describedby="dataTable_info" style="max-height: 500px;">
-                                <table id="dataTable" class="table my-sm-0" style="overflow-y: scroll; transition: all 0.5s ease-in-out;">
-                                    <thead>
-                                        <tr>
-                                            <th>Matricula</th>
-                                            <th>Nombre</th>
-                                            <th>Curso</th>
-                                            <th>Fecha</th>
-                                            <th>Hora-llegada</th>
-                                            <th>Hora-salida</th>
-                                            <th>Tardanzas</th>
-                                            <th>Ausencias</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersLog">
-                                    </tbody> 
-                                    <tfoot>
-                                        <tr>
-                                            <td><strong>Matricula</strong></td>
-                                            <td><strong>Nombre</strong></td>
-                                            <td><strong>Curso</strong></td>
-                                            <th>Fecha</th>
-                                            <td><strong>Hora-llegada</strong></td>
-                                            <td><strong>Hora-salida</strong></td>
-                                            <td><strong>Tardanzas</strong></td>
-                                            <td><strong>Auesncias</strong></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
+                        <div class="col-auto"><i class="fas fa-user-graduate fa-2x dashboard-icon"></i></div>
                     </div>
                 </div>
             </div>
-<?php   
-    include('./footer.php');
+        </div>
+        <div class="col-md-6 col-xl-3 mb-4">
+            <div class="card shadow border-start-success py-2">
+                <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de maestros impartiendo docencia en ITESA durante este periodo">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col me-2">
+                            <div class="text-uppercase text-success fw-bold text-xs mb-1"><span>Total maestros</span></div>
+                            <div class="text-dark fw-bold h5 mb-0"><span>25</span></div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-chalkboard-teacher fa-2x" style="color: rgb(54,55,58) !important;"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3 mb-4">
+            <div class="card shadow border-start-info py-2">
+                <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de secciones en ITESA, estas cuentan todos los grados (4TO, 5TO, 6TO)">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col me-2">
+                            <div class="text-uppercase text-info fw-bold text-xs mb-1"><span>total de Aulas</span></div>
+                            <div class="row g-0 align-items-center">
+                                <div class="col-auto">
+                                    <div class="text-dark fw-bold h5 mb-0"><span>24</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-school fa-2x dashboard-icon"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3 mb-4">
+            <div class="card shadow border-start-warning py-2">
+                <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Estudiantes con mas de 4 tardanzas a los cuales se les envia una carta de advertencia">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col me-2">
+                            <div class="text-uppercase text-warning fw-bold text-xs mb-1"><span>AVg. hora llegada</span></div>
+                            <div class="text-dark fw-bold h5 mb-0"><span>7:25 AM</span></div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-clock fa-2x dashboard-icon"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-7 col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="text-primary fw-bold m-0">Cantidad de estudiantes por grado</h6>
+                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                        <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
+                            <p class="text-center dropdown-header">SEleccione el grado</p><a class="dropdown-item" href="#">&nbsp;4TO</a><a class="dropdown-item" href="#">5TO</a><a class="dropdown-item" href="#">6TO</a>
+                            <div class="dropdown-divider"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div><canvas data-bss-chart="{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;January&quot;,&quot;February&quot;,&quot;March&quot;,&quot;April&quot;,&quot;May&quot;,&quot;June&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Revenue&quot;,&quot;backgroundColor&quot;:&quot;#4e73df&quot;,&quot;borderColor&quot;:&quot;#4e73df&quot;,&quot;data&quot;:[&quot;4500&quot;,&quot;5300&quot;,&quot;6250&quot;,&quot;7800&quot;,&quot;9800&quot;,&quot;15000&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:true,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;},&quot;position&quot;:&quot;top&quot;},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;bold&quot;},&quot;scales&quot;:{&quot;xAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}],&quot;yAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}]}}}" width="632" height="316" style="display: block; width: 632px; height: 316px;" class="chartjs-render-monitor"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-xl-4">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="text-primary fw-bold m-0">No. de estudiantes tardíos</h6>
+                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="true" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                        <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in" data-bs-popper="none">
+                            <p class="text-center dropdown-header">Seleccione la seccion</p><a class="dropdown-item" href="#">5TO A</a><a class="dropdown-item" href="#">5TO E</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div><canvas data-bss-chart="{&quot;type&quot;:&quot;doughnut&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;Direct&quot;,&quot;Social&quot;,&quot;Referral&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;&quot;,&quot;backgroundColor&quot;:[&quot;#df4c40&quot;,&quot;#1cc88a&quot;],&quot;borderColor&quot;:[&quot;#ffffff&quot;,&quot;#ffffff&quot;],&quot;data&quot;:[&quot;35&quot;,&quot;30&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:false,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}}}" width="287" height="320" style="display: block; width: 287px; height: 320px;" class="chartjs-render-monitor"></canvas></div>
+                    <div class="text-center small mt-4"><span class="me-2"><i class="fas fa-circle text-danger" style="color: var(--bs-danger);"></i>&nbsp;Mas de 4 tardanzas</span><span class="me-2"><i class="fas fa-circle text-success"></i>&nbsp;Normal</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="text-primary fw-bold m-0">Reportaje de las horas de llegada</h6>
+                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                        <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
+                            <p class="text-center dropdown-header">SEleccione el grado</p><a class="dropdown-item" href="#">&nbsp;4TO</a><a class="dropdown-item" href="#">5TO</a><a class="dropdown-item" href="#">6TO</a>
+                            <div class="dropdown-divider"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div><canvas data-bss-chart="{&quot;type&quot;:&quot;scatter&quot;,&quot;data&quot;:{&quot;datasets&quot;:[{&quot;label&quot;:&quot;Revenue&quot;,&quot;backgroundColor&quot;:&quot;#4e73df&quot;,&quot;borderColor&quot;:&quot;#4e73df&quot;,&quot;data&quot;:[{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;4500&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;5300&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;6250&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;7800&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;9800&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;15000&quot;}]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:true,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;},&quot;position&quot;:&quot;top&quot;},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;bold&quot;},&quot;scales&quot;:{&quot;xAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}],&quot;yAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}]}}}" width="977" height="488" style="display: block; width: 977px; height: 488px;" class="chartjs-render-monitor"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="./js/chart.min.js"></script>
+<?php
+include 'footer.php'
 ?>
