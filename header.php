@@ -21,7 +21,7 @@
             <div id="layoutSidenav_nav">
                 <div id="sidenavAccordion" class="sb-sidenav accordion sb-sidenav-dark">
                     <div class="sb-sidenav-menu" style="background: #171516;">
-                        <div class="nav"><img src="assets/img/Asinyx%20logo.svg" width="237" height="193">
+                        <div class="nav"><img src="assets/img/asinyx_logo.svg" width="237" height="193">
                         <div>
                                 <a class="nav-link <?php if ($_SESSION['current_page'] == "index") echo "active" ?>" href="index.php">
                                     <div class="sb-nav-link-icon">
