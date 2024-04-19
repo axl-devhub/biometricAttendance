@@ -97,14 +97,14 @@ if (isset($_POST['Add'])) {
                         mysqli_stmt_execute($result);
                         $resultl = mysqli_stmt_get_result($result);
                         if (!$row = mysqli_fetch_assoc($resultl)) {
-                            $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=?";
+                            $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=1";
                             $result = mysqli_stmt_init($conn);
                             if (!mysqli_stmt_prepare($result, $sql)) {
                                 echo "SQL_Error";
                                 exit();
                             }
                             else{
-                                mysqli_stmt_bind_param($result, "ii", $curso, $maestro);
+                                mysqli_stmt_bind_param($result, "i", $curso);
                                 mysqli_stmt_execute($result);
                                 $resultl = mysqli_stmt_get_result($result);
                                 $row = mysqli_fetch_assoc($resultl);
@@ -277,14 +277,14 @@ if (isset($_POST['Update'])) {
                         if (!$row = mysqli_fetch_assoc($resultl)) {
 
                             if (!empty($nombre) && !empty($apellido) && !empty($matricula)) {
-                                $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=?";
+                                $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=1";
                                 $result = mysqli_stmt_init($conn);
                                 if (!mysqli_stmt_prepare($result, $sql)) {
                                     echo "SQL_Error";
                                     exit();
                                 }
                                 else{
-                                    mysqli_stmt_bind_param($result, "ii", $curso, $maestro);
+                                    mysqli_stmt_bind_param($result, "i", $curso);
                                     mysqli_stmt_execute($result);
                                     $resultl = mysqli_stmt_get_result($result);
                                     $row = mysqli_fetch_assoc($resultl);

@@ -41,6 +41,39 @@ if ($result) {
     }
 }
 
+$sql = "SELECT COUNT(users.id) as student_count, curso FROM users INNER JOIN cursos ON users.id_curso = cursos.id GROUP BY cursos.curso";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$secciones = [];
+$cantidad_estudiantes = [];
+while ($row = $result->fetch_assoc()) {
+    $secciones[] = $row['curso'];
+    $cantidad_estudiantes[] = $row['student_count'];
+}
+
+$chart_config = [
+    "type" => "bar",
+    "data" => [
+        "labels" => $secciones,
+        "datasets" => [
+            [
+                "label" => "Cantidad de estudiantes",
+                "backgroundColor" => "#3366CC",
+                "borderColor" => "#3366CC ",
+                "data" => $cantidad_estudiantes
+            ]
+        ]
+    ],
+];
+
+$chart_config_json = htmlspecialchars(json_encode($chart_config), ENT_QUOTES, 'UTF-8');
+
+$student_count_chart = "<canvas data-bss-chart=\"$chart_config_json\" width=\"632\" height=\"316\" style=\"display: block; width: 632px; height: 316px;\" class=\"chartjs-render-monitor\"></canvas>";
+
+
+
 
 
 
@@ -104,7 +137,7 @@ if ($result) {
       </div>
       <div class="col-md-6 col-xl-3 mb-4">
          <div class="card shadow border-start-warning py-2">
-            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Estudiantes con mas de 4 tardanzas a los cuales se les envia una carta de advertencia">
+            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Promedio de hora de llegada">
                <div class="row align-items-center no-gutters">
                   <div class="col me-2">
                      <div class="text-uppercase text-warning fw-bold text-xs mb-1"><span>AVg. hora llegada</span></div>
@@ -122,11 +155,14 @@ if ($result) {
             <div class="card-header d-flex justify-content-between align-items-center">
                <h6 class="text-primary fw-bold m-0">Cantidad de estudiantes por grado</h6>
                <div class="dropdown no-arrow">
-                  <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                  <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">
+                     <i class="fas fa-ellipsis-v text-gray-400"></i>
+                  </button>
                   <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
                      <p class="text-center dropdown-header">SEleccione el grado</p>
-                     <a class="dropdown-item" href="#">&nbsp;4TO</a><a class="dropdown-item" href="#">5TO</a><a class="dropdown-item" href="#">6TO</a>
-                     <div class="dropdown-divider"></div>
+                     <a class="dropdown-item" href="#">&nbsp;4TO</a>
+                     <a class="dropdown-item" href="#">5TO</a>
+                     <a class="dropdown-item" href="#">6TO</a>
                   </div>
                </div>
             </div>
@@ -140,7 +176,7 @@ if ($result) {
                         <div class=""></div>
                      </div>
                   </div>
-                  <canvas data-bss-chart="{&quot;type&quot;:&quot;horizontalBar&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;January&quot;,&quot;February&quot;,&quot;March&quot;,&quot;April&quot;,&quot;May&quot;,&quot;June&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Revenue&quot;,&quot;backgroundColor&quot;:&quot;#4e73df&quot;,&quot;borderColor&quot;:&quot;#4e73df&quot;,&quot;data&quot;:[&quot;4500&quot;,&quot;5300&quot;,&quot;6250&quot;,&quot;7800&quot;,&quot;9800&quot;,&quot;15000&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:true,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;},&quot;position&quot;:&quot;top&quot;},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;bold&quot;},&quot;scales&quot;:{&quot;xAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}],&quot;yAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}]}}}" width="632" height="316" style="display: block; width: 632px; height: 316px;" class="chartjs-render-monitor"></canvas>
+                  <?= $student_count_chart ?>
                </div>
             </div>
          </div>
