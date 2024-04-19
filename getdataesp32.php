@@ -6,7 +6,9 @@ if (isset($_GET['FingerID'])) {
     
     $fingerID = $_GET['FingerID'];
 
-    $sql = "SELECT * FROM users WHERE fingerprint_id=?";
+    $sql = "SELECT users.*, CONCAT(cursos.grado, ' ', cursos.curso) AS curso_usuario FROM users
+            INNER JOIN cursos ON users.id_curso = cursos.id
+            WHERE fingerprint_id=?";
     $result = mysqli_stmt_init($conn);
     if (!mysqli_stmt_prepare($result, $sql)) {
         echo "SQL_Error_Select_card";
@@ -18,7 +20,7 @@ if (isset($_GET['FingerID'])) {
         $resultl = mysqli_stmt_get_result($result);
         if ($row = mysqli_fetch_assoc($resultl)){
             //*****************************************************
-            //An existed fingerprint has been detected for Login or Logout
+            //An existing fingerprint has been detected for Login or Logout
             if ($row['nombre'] != "nombre"){
                 $nombre = $row['nombre'];
                 $apellido =  $row['apellido'];
@@ -26,9 +28,9 @@ if (isset($_GET['FingerID'])) {
                 $tardanzas = $row['tardanzas'];
                 $ausencias = $row['ausencias'];
 
-                $curso = "5TO E";//por ahora
+                $curso = $row['curso_usuario'];
                 $id = $row['id']; 
-                $sql = "SELECT * FROM users_logs WHERE fingerprint_id=? AND checkindate=CURDATE() AND hora_salida=''";
+                $sql = "SELECT * FROM users_logs WHERE fingerprint_id=? AND checkindate=CURDATE()";
                 $result = mysqli_stmt_init($conn);
                 if (!mysqli_stmt_prepare($result, $sql)) {
                     echo "SQL_Error_Select_logs";
@@ -41,7 +43,6 @@ if (isset($_GET['FingerID'])) {
                     //*****************************************************
                     //Login
                     if (!$row = mysqli_fetch_assoc($resultl)){
-
                         $sql = "INSERT INTO users_logs (
                                     nombre, apellido, matricula, tardanzas, ausencias, curso, fingerprint_id, checkindate, hora_llegada, hora_salida, user_id
                                 ) 
@@ -60,25 +61,35 @@ if (isset($_GET['FingerID'])) {
                         
                             // Get the current time
                             date_default_timezone_set('America/Santo_Domingo');
-                            $current_time = date('H:i:s', strtotime('now'));
-                        
-                            // Check if the current time is later than 7:40 AM
-                            if ($current_time > '7:40:00') {
+                            $current_time = new DateTime(); // This will be in the 'America/Santo_Domingo' timezone
+                            $compare_time = new DateTime('7:40:00');
+
+                            if ($current_time > $compare_time) {
                                 // Prepare the SQL statement to increment the tardanzas field
                                 $sql_tardanzas = "UPDATE users SET tardanzas = tardanzas + 1 WHERE fingerprint_id = ?";
                                 $result_tardanzas = mysqli_stmt_init($conn);
-                        
+                                
                                 if (!mysqli_stmt_prepare($result_tardanzas, $sql_tardanzas)) {
                                     echo "SQL_Error_Update_tardanzas";
                                     exit();
                                 } else {
                                     mysqli_stmt_bind_param($result_tardanzas, "i", $fingerID);
                                     mysqli_stmt_execute($result_tardanzas);
-                                    $matricula = $matricula . "  Tardanza";
+                                    
+                                    $sqlInertIntoLog = "INSERT INTO tardanzas_log (id_usuario, fecha, tardanza) VALUES (?, CURDATE(), ?)";
+                                    $resultInertIntoLog = mysqli_stmt_init($conn);
+                                    if (!mysqli_stmt_prepare($resultInertIntoLog, $sqlInertIntoLog)) {
+                                        echo "SQL_Error_Insert_tardanzas_logs";
+                                        exit();
+                                    } else {
+                                        $tardanza = $tardanzas + 1;
+                                        mysqli_stmt_bind_param($resultInertIntoLog, "ii", $id, $tardanza);
+                                        mysqli_stmt_execute($resultInertIntoLog);
+                                        $matricula = $matricula . "  Tardanza";
+                                    }
                                 }
-
                             }
-                        
+                            
                             echo "login".$matricula;
                             exit();
                         }
@@ -86,6 +97,15 @@ if (isset($_GET['FingerID'])) {
                     //*****************************************************
                     //Logout
                     else{
+                    mysqli_stmt_bind_param($result, "s", $fingerID);
+                    mysqli_stmt_execute($result);
+                    $resultl = mysqli_stmt_get_result($result);
+                        if ($check_login = mysqli_fetch_assoc($resultl)){
+                            if ($check_login['hora_salida'] != "00:00:00") {
+                                echo "logout"."Ya se      registro ";
+                                exit();
+                            }
+                        }
                         $sql="UPDATE users_logs SET hora_salida=CURTIME() WHERE fingerprint_id=? AND checkindate=CURDATE() AND hora_salida='0'";
                         $result = mysqli_stmt_init($conn);
                         if (!mysqli_stmt_prepare($result, $sql)) {

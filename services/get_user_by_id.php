@@ -6,7 +6,7 @@ if (isset($_GET['Finger_id'])) {
     $fingerID = $_GET['Finger_id'];
 
     // Prepare the SQL statement
-    if ($stmt = $conn->prepare("SELECT nombre, apellido, ausencias, id_curso, matricula, sexo, tardanzas FROM users WHERE fingerprint_id = ?")) {
+    if ($stmt = $conn->prepare("SELECT nombre, apellido, ausencias, id_curso, matricula, sexo, tardanzas, maestro FROM users WHERE fingerprint_id = ?")) {
         $stmt->bind_param("i", $fingerID);
 
         $stmt->execute();

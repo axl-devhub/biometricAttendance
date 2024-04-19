@@ -99,7 +99,11 @@
 }
 
 .btn.focus, .btn:focus, .btn:hover {
+  color: #ffffff;
+  text-decoration: none;
+  background: #282929;
 }
+
 
 .btn {
   transition: all ease-in 0.5s;

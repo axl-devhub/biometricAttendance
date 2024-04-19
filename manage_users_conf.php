@@ -68,6 +68,7 @@ if (isset($_POST['Add'])) {
     $tardanzas = $_POST['tardanzas'];
     $ausencias = $_POST['ausencias'];
     $curso = (int)$_POST['curso'];
+    $maestro = $_POST['maestro'];
 
     //check if there any selected user
     $sql = "SELECT nombre FROM users WHERE fingerprint_select=1";
@@ -96,14 +97,30 @@ if (isset($_POST['Add'])) {
                         mysqli_stmt_execute($result);
                         $resultl = mysqli_stmt_get_result($result);
                         if (!$row = mysqli_fetch_assoc($resultl)) {
-                            $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, user_date=CURDATE() WHERE fingerprint_select=1";
+                            $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=1";
+                            $result = mysqli_stmt_init($conn);
+                            if (!mysqli_stmt_prepare($result, $sql)) {
+                                echo "SQL_Error";
+                                exit();
+                            }
+                            else{
+                                mysqli_stmt_bind_param($result, "i", $curso);
+                                mysqli_stmt_execute($result);
+                                $resultl = mysqli_stmt_get_result($result);
+                                $row = mysqli_fetch_assoc($resultl);
+                                if ($row['count']) {
+                                    echo json_encode(['error' => true, 'message' => "Ya existe un maestro encargado para ese curso"]);
+                                    exit();
+                                }
+                            }
+                            $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, maestro=?, user_date=CURDATE() WHERE fingerprint_select=1";
                             $result = mysqli_stmt_init($conn);
                             if (!mysqli_stmt_prepare($result, $sql)) {
                                 echo "SQL_Error_select_Fingerprint";
                                 exit();
                             }
                             else{
-                                mysqli_stmt_bind_param($result, "sssisii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias);
+                                mysqli_stmt_bind_param($result, "sssisiii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias, $maestro);
                                 mysqli_stmt_execute($result);
 
                                 echo json_encode(['success' => true, 'message' => "Se ha añadido un nuevo usuario"]);
@@ -142,7 +159,7 @@ if (isset($_POST['Add_fingerID'])) {
     $matricula = "0000-0000";
 
     //optional
-    $sexo= "sexo";
+    $sexo = "sexo";
 
     if ($fingerid == 0) {
         echo json_encode(['error' => true, 'message' => 'Añada un FPUID valido para registrar el usuario!']);
@@ -222,6 +239,8 @@ if (isset($_POST['Update'])) {
     $tardanzas = $_POST['tardanzas'];
     $ausencias = $_POST['ausencias'];
     $curso = (int)$_POST['curso'];
+
+    $maestro = $_POST['maestro'];
     //check if there any selected user
     $sql = "SELECT * FROM users WHERE fingerprint_select=1";
     $result = mysqli_stmt_init($conn);
@@ -258,15 +277,30 @@ if (isset($_POST['Update'])) {
                         if (!$row = mysqli_fetch_assoc($resultl)) {
 
                             if (!empty($nombre) && !empty($apellido) && !empty($matricula)) {
-
-                                $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=? WHERE fingerprint_select=1";
+                                $sql = "SELECT COUNT(*) as count FROM users WHERE id_curso=? AND maestro=1";
+                                $result = mysqli_stmt_init($conn);
+                                if (!mysqli_stmt_prepare($result, $sql)) {
+                                    echo "SQL_Error";
+                                    exit();
+                                }
+                                else{
+                                    mysqli_stmt_bind_param($result, "i", $curso);
+                                    mysqli_stmt_execute($result);
+                                    $resultl = mysqli_stmt_get_result($result);
+                                    $row = mysqli_fetch_assoc($resultl);
+                                    if ($row['count']) {
+                                        echo json_encode(['error' => true, 'message' => "Ya existe un maestro encargado para ese curso"]);
+                                        exit();
+                                    }
+                                }
+                                $sql="UPDATE users SET nombre=?, apellido=?, matricula=?, id_curso=?, sexo=?, tardanzas=?, ausencias=?, maestro=? WHERE fingerprint_select=1";
                                 $result = mysqli_stmt_init($conn);
                                 if (!mysqli_stmt_prepare($result, $sql)) {
                                     echo json_encode(['error' => true, 'message' => "SQL_Error_select_Fingerprint"]);
                                     exit();
                                 }
                                 else{
-                                    mysqli_stmt_bind_param($result, "sssisii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias);
+                                    mysqli_stmt_bind_param($result, "sssisiii", $nombre, $apellido, $matricula, $curso, $sexo, $tardanzas, $ausencias, $maestro);
                                     mysqli_stmt_execute($result);
 
                                     echo json_encode(['success' => true, 'message' => "El usuario seleccionado ha sido actualizado!"]);

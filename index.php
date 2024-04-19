@@ -1,184 +1,247 @@
-<?php 
-  session_start();
-  $_SESSION['current_page'] = "index";
-  include'header.php'; 
-?> 
+<?php
+$_SESSION['current_page'] = "index";
+include 'header.php';
 
-<script src="js/user_log_2.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
-<script>
-    $(document).ready(function() {
-        let today = moment().tz("America/Santo_Domingo").format('YYYY-MM-DD');
-        $('#date_sel').val(today);
-        $('#dataTable').css('opacity', 0.5);
+include 'connectDB.php';
 
-        let selectedDate = $('#date_sel').val();
-      $.ajax({
-          url: 'user_log_up.php',
-          type: 'POST',
-          data: {
-              'date_sel': selectedDate,
-              'log_date': 1,
-          },
-          success: function(response){
-            $.ajax({
-              url: "user_log_up.php",
-              type: 'POST',
-              data: {
-                'log_date': 1,
-                'date_sel': selectedDate,
-                'select_date': 0,
-              }
-              }).done(function(data) {
-              $('#dataTable').css('opacity', 1); 
-              $('#usersLog').html(data);
-            });
-          }
-        });
-    });
-    $(document).ready(function(){
-    $.ajax({
-    url: "user_log_up.php",
-    type: 'POST',
-    data: {
-        'select_date': 1,
+$sql = "SELECT COUNT(id) FROM users WHERE maestro = 0";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row = mysqli_fetch_array($result);
+    $total_estudiantes = $row[0];
+}
+
+$sql = "SELECT COUNT(id) FROM users WHERE maestro = 1";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row = mysqli_fetch_array($result);
+    $total_maestros = $row[0];
+}
+
+$sql = "SELECT COUNT(id) FROM cursos";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row = mysqli_fetch_array($result);
+    $total_cursos = $row[0];
+}
+
+$sql = "SELECT DATE_FORMAT(SEC_TO_TIME(ROUND(AVG(TIME_TO_SEC(hora_llegada)))), '%H:%i') 
+FROM users_logs 
+LIMIT 400";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row = mysqli_fetch_array($result);
+    $avg_hora_llegada = $row[0];
+
+    if ($avg_hora_llegada < "12:00:00"){
+        $avg_hora_llegada .= " AM";
+    } else {
+        $avg_hora_llegada .= "PM";
+    
     }
-    });
-    var intervalId;
+}
 
-    function startInterval() {
-        intervalId = setInterval(function() {
-            $.ajax({
-                url: "user_log_up.php",
-                type: 'POST',
-                data: {
-                    'select_date': 0,
-                },
-                success: function(data) {
-                    $('#usersLog').html(data);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.error("AJAX error: " + textStatus + ' : ' + errorThrown);
-                }
-            });
-        }, 5000);
-    }
+$sql = "SELECT COUNT(users.id) as student_count, curso FROM users INNER JOIN cursos ON users.id_curso = cursos.id GROUP BY cursos.curso";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    function stopInterval() {
-        clearInterval(intervalId);
-    }
+$secciones = [];
+$cantidad_estudiantes = [];
+while ($row = $result->fetch_assoc()) {
+    $secciones[] = $row['curso'];
+    $cantidad_estudiantes[] = $row['student_count'];
+}
 
-    // Start the interval when the page loads
-    startInterval();
+$chart_config = [
+    "type" => "bar",
+    "data" => [
+        "labels" => $secciones,
+        "datasets" => [
+            [
+                "label" => "Cantidad de estudiantes",
+                "backgroundColor" => "#3366CC",
+                "borderColor" => "#3366CC ",
+                "data" => $cantidad_estudiantes
+            ]
+        ]
+    ],
+];
 
-    // Stop the interval when the search bar gains focus
-    $('#dataTableFilter').focus(stopInterval);
+$chart_config_json = htmlspecialchars(json_encode($chart_config), ENT_QUOTES, 'UTF-8');
 
-    // Start the interval when the search bar loses focus
-    $('#dataTableFilter').blur(startInterval);
-    $(document).ready(function(){
-    $("#dataTableFilter").on("keyup", function() {
-        var value = $(this).val().toUpperCase();
-        $("#dataTable tr").filter(function() {
-        $(this).toggle($(this).text().toUpperCase().indexOf(value) > -1)
-        });
-    });
-  });
-});
-</script>
+$student_count_chart = "<canvas data-bss-chart=\"$chart_config_json\" width=\"632\" height=\"316\" style=\"display: block; width: 632px; height: 316px;\" class=\"chartjs-render-monitor\"></canvas>";
 
 
-<div id="content" style="margin-left: 0;">
-                <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
-                    <div class="container-fluid">
-                        <button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button" bs-><i class="fas fa-bars"></i></button>
-                        <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item no-arrow"><a class="nav-link nav-link active" href="#">
-                                    <div class="sb-nav-link-icon"><img class="border rounded-circle img-profile" src="assets/img/Asinyx%20logo.svg" width="49" height="49"></div><span>&nbsp; Usuario</span>
-                                </a></li>
-                        </ul>
-                    </div>
-                </nav>
-                <div class="container-fluid">
-                    <h3 class="text-dark mb-4">Asistencia</h3>
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <div class="row">
-                                <div class="col d-flex flex-row justify-content-xxl-start">
-                                    <form  method="POST" action="Export_Excel.php" style="display: flex; width: 100%;">
-                                        <div class="d-inline-block">
-                                            <button class="btn btn-primary btn-icon-split" role="button" name="To_Excel" type="submit">
-                                                <span class="text-white-50 icon">
-                                                    <i class="fas fa-angle-double-down"></i>
-                                                </span>
-                                                <span class="text-white text">
-                                                    Exportar excel
-                                                </span>
-                                            </button>
-                                        </div>
-                                        <div class="d-flex ms-auto">
-                                            <input type="date" name="date_sel" id="date_sel"/>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body" style="max-height: 800px;">
-                            <div class="row">
-                                <div class="col-md-6 text-nowrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Mostrar 
-                                            <select id="dateFilter" class="d-inline-block form-select form-select-sm">
-                                                <option value="currentDate" selected>Hoy</option>
-                                                <option value="currenWeek">Esta semana</option>
-                                                <option value="currentMonth">Este mes</option>
-                                                <option value="all">Todos</option>
-                                            </select></label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input id="dataTableFilter" class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Buscar por matricula" /></label></div>
-                                </div>
-                            </div>
-                            <div class="jumbotron-container" id="noAsistanceMessage" style="display: none;"> 
-                                <div class="jumbotron"> 
-                                    <h1 class="display-4 cool-fonted">There are no products to show my friend</h1> 
-                                    <hr class="my-4"> 
-                                    <p class="lead align-center">Add one above to get started</p> 
-                                </div> 
-                            </div>
-                            <div id="dataTable-1" class="table-responsive table-responsive-sm mt-1" role="grid" aria-describedby="dataTable_info" style="max-height: 500px;">
-                                <table id="dataTable" class="table my-sm-0" style="overflow-y: scroll; transition: all 0.5s ease-in-out;">
-                                    <thead>
-                                        <tr>
-                                            <th>Matricula</th>
-                                            <th>Nombre</th>
-                                            <th>Curso</th>
-                                            <th>Hora-llegada</th>
-                                            <th>Hora-salida</th>
-                                            <th>Tardanzas</th>
-                                            <th>Ausencias</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersLog">
-                                    </tbody> 
-                                    <tfoot>
-                                        <tr>
-                                            <td><strong>Matricula</strong></td>
-                                            <td><strong>Nombre</strong></td>
-                                            <td><strong>Curso</strong></td>
-                                            <td><strong>Hora-llegada</strong></td>
-                                            <td><strong>Hora-salida</strong></td>
-                                            <td><strong>Tardanzas</strong></td>
-                                            <td><strong>Auesncias</strong></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
+
+
+?>
+<style>
+    .dashboard-icon {
+  color: rgb(54,55,58);
+}
+</style>
+<div class="container-fluid">
+   <div class="d-sm-flex justify-content-between align-items-center mb-4">
+      <h3 class="text-dark mb-0">Dashboard</h3>
+      <div class="dropdown">
+         <button class="btn btn-dark dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Descargar Reporte&nbsp;</button>
+         <div class="dropdown-menu" style="max-height: 200px;overflow-y: auto;"><a class="dropdown-item" href="#">2023-2024 - Actual</a><a class="dropdown-item" href="#">2022-2023</a><a class="dropdown-item" href="#">2021-2022</a></div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-6 col-xl-3 mb-4">
+         <div class="card shadow border-start-primary py-2">
+            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de estudiantes inscritos en ITESA durante este año lectivo">
+               <div class="row align-items-center no-gutters">
+                  <div class="col me-2">
+                     <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Total estudiantes</span></div>
+                     <div class="text-dark fw-bold h5 mb-0"><span><?= $total_estudiantes; ?></span></div>
+                  </div>
+                  <div class="col-auto"><i class="fas fa-user-graduate fa-2x dashboard-icon"></i></div>
+               </div>
             </div>
-<?php   
-    include('./footer.php');
+         </div>
+      </div>
+      <div class="col-md-6 col-xl-3 mb-4">
+         <div class="card shadow border-start-success py-2">
+            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de maestros impartiendo docencia en ITESA durante este periodo">
+               <div class="row align-items-center no-gutters">
+                  <div class="col me-2">
+                     <div class="text-uppercase text-success fw-bold text-xs mb-1"><span>Total maestros</span></div>
+                     <div class="text-dark fw-bold h5 mb-0"><span><?= $total_maestros; ?></span></div>
+                  </div>
+                  <div class="col-auto"><i class="fas fa-chalkboard-teacher fa-2x" style="color: rgb(54,55,58) !important;"></i></div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-6 col-xl-3 mb-4">
+         <div class="card shadow border-start-info py-2">
+            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Total de secciones en ITESA, estas cuentan todos los grados (4TO, 5TO, 6TO)">
+               <div class="row align-items-center no-gutters">
+                  <div class="col me-2">
+                     <div class="text-uppercase text-info fw-bold text-xs mb-1"><span>total de Aulas</span></div>
+                     <div class="row g-0 align-items-center">
+                        <div class="col-auto">
+                           <div class="text-dark fw-bold h5 mb-0"><span><?= $total_cursos?></span></div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-auto"><i class="fas fa-school fa-2x dashboard-icon"></i></div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-6 col-xl-3 mb-4">
+         <div class="card shadow border-start-warning py-2">
+            <div class="card-body" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-original-title="Promedio de hora de llegada">
+               <div class="row align-items-center no-gutters">
+                  <div class="col me-2">
+                     <div class="text-uppercase text-warning fw-bold text-xs mb-1"><span>AVg. hora llegada</span></div>
+                     <div class="text-dark fw-bold h5 mb-0"><span><?= $avg_hora_llegada ?></span></div>
+                  </div>
+                  <div class="col-auto"><i class="fas fa-clock fa-2x dashboard-icon"></i></div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-lg-7 col-xl-8">
+         <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+               <h6 class="text-primary fw-bold m-0">Cantidad de estudiantes por grado</h6>
+               <div class="dropdown no-arrow">
+                  <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">
+                     <i class="fas fa-ellipsis-v text-gray-400"></i>
+                  </button>
+                  <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
+                     <p class="text-center dropdown-header">SEleccione el grado</p>
+                     <a class="dropdown-item" href="#">&nbsp;4TO</a>
+                     <a class="dropdown-item" href="#">5TO</a>
+                     <a class="dropdown-item" href="#">6TO</a>
+                  </div>
+               </div>
+            </div>
+            <div class="card-body">
+               <div>
+                  <div class="chartjs-size-monitor">
+                     <div class="chartjs-size-monitor-expand">
+                        <div class=""></div>
+                     </div>
+                     <div class="chartjs-size-monitor-shrink">
+                        <div class=""></div>
+                     </div>
+                  </div>
+                  <?= $student_count_chart ?>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="col-lg-5 col-xl-4">
+         <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+               <h6 class="text-primary fw-bold m-0">No. de estudiantes tardíos</h6>
+               <div class="dropdown no-arrow">
+                  <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="true" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                  <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in" data-bs-popper="none">
+                     <p class="text-center dropdown-header">Seleccione la seccion</p>
+                     <a class="dropdown-item" href="#">5TO A</a><a class="dropdown-item" href="#">5TO E</a>
+                  </div>
+               </div>
+            </div>
+            <div class="card-body">
+               <div class="chart-area">
+                  <div class="chartjs-size-monitor">
+                     <div class="chartjs-size-monitor-expand">
+                        <div class=""></div>
+                     </div>
+                     <div class="chartjs-size-monitor-shrink">
+                        <div class=""></div>
+                     </div>
+                  </div>
+                  <canvas data-bss-chart="{&quot;type&quot;:&quot;doughnut&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;Direct&quot;,&quot;Social&quot;,&quot;Referral&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;&quot;,&quot;backgroundColor&quot;:[&quot;#df4c40&quot;,&quot;#1cc88a&quot;],&quot;borderColor&quot;:[&quot;#ffffff&quot;,&quot;#ffffff&quot;],&quot;data&quot;:[&quot;35&quot;,&quot;30&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:false,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}}}" width="287" height="320" style="display: block; width: 287px; height: 320px;" class="chartjs-render-monitor"></canvas>
+               </div>
+               <div class="text-center small mt-4"><span class="me-2"><i class="fas fa-circle text-danger" style="color: var(--bs-danger);"></i>&nbsp;Mas de 4 tardanzas</span><span class="me-2"><i class="fas fa-circle text-success"></i>&nbsp;Normal</span></div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col">
+         <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+               <h6 class="text-primary fw-bold m-0">Reportaje de las horas de llegada</h6>
+               <div class="dropdown no-arrow">
+                  <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i class="fas fa-ellipsis-v text-gray-400"></i></button>
+                  <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
+                     <p class="text-center dropdown-header">SEleccione la tanda</p>
+                     <a class="dropdown-item" href="#">&nbsp;Mañana</a><a class="dropdown-item" href="#">Tarde</a>
+                     <div class="dropdown-divider"></div>
+                  </div>
+               </div>
+            </div>
+            <div class="card-body">
+               <div>
+                  <div class="chartjs-size-monitor">
+                     <div class="chartjs-size-monitor-expand">
+                        <div class=""></div>
+                     </div>
+                     <div class="chartjs-size-monitor-shrink">
+                        <div class=""></div>
+                     </div>
+                  </div>
+                  <canvas data-bss-chart="{&quot;type&quot;:&quot;scatter&quot;,&quot;data&quot;:{&quot;datasets&quot;:[{&quot;label&quot;:&quot;Revenue&quot;,&quot;backgroundColor&quot;:&quot;#4e73df&quot;,&quot;borderColor&quot;:&quot;#4e73df&quot;,&quot;data&quot;:[{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;4500&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;5300&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;6250&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;7800&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;9800&quot;},{&quot;x&quot;:&quot;&quot;,&quot;y&quot;:&quot;15000&quot;}]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:true,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;},&quot;position&quot;:&quot;top&quot;},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;bold&quot;},&quot;scales&quot;:{&quot;xAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}],&quot;yAxes&quot;:[{&quot;ticks&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;,&quot;beginAtZero&quot;:false}}]}}}" width="977" height="488" style="display: block; width: 977px; height: 488px;" class="chartjs-render-monitor"></canvas>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<script src="./js/chart.min.js"></script>
+<?php
+include 'footer.php'
 ?>

@@ -3,8 +3,12 @@
   $_SESSION['current_page'] = "cursos";
 
   include 'connectDB.php';
-  $sql = "SELECT * FROM cursos GROUP BY grado";
+  $sql = "SELECT cursos.*, COUNT(users.id_curso) as student_count 
+  FROM cursos 
+  LEFT JOIN users ON cursos.id= users.id_curso 
+  GROUP BY cursos.id";
   $result = mysqli_query($conn, $sql);
+
 
     $courses = array();
     while ($row = mysqli_fetch_assoc($result)) {
@@ -13,20 +17,6 @@
 
   include'header.php'; 
 ?> 
-
-
-
-<div id="content" style="margin-left: 0;">
-                <nav class="navbar navbar-expand bg-dark shadow mb-4 topbar static-top navbar-light" style="--bs-dark: #1e1b1d;--bs-dark-rgb: 30,27,29;background: rgb(28,28,31);" data-bs-theme="dark">
-                    <div class="container-fluid">
-                        <button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button" bs-><i class="fas fa-bars"></i></button>
-                        <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item no-arrow"><a class="nav-link nav-link active" href="#">
-                                    <div class="sb-nav-link-icon"><img class="border rounded-circle img-profile" src="assets/img/Asinyx%20logo.svg" width="49" height="49"></div><span>&nbsp; Usuario</span>
-                                </a></li>
-                        </ul>
-                    </div>
-                </nav>
                 <div class="container-fluid">
                     <h3 class="text-dark mb-4">Asistencia</h3>
 <div class="card shadow" style="margin-bottom: 32px;">
@@ -53,42 +43,18 @@
                             <td>30</td>
                         </a>
                     </tr>
-                    <tr>
-                        <td>B</td>
-                        <td>Multimedia y Artes Gráficas</td>
-                        <td>Edward Fernandez</td>
-                        <td>38</td>
-                    </tr>
-                    <tr>
-                        <td>C</td>
-                        <td>Mecánica </td>
-                        <td>Mary Lourdes</td>
-                        <td>28</td>
-                    </tr>
-                    <tr>
-                        <td>D</td>
-                        <td>Electricidad</td>
-                        <td>Laura Jimenez </td>
-                        <td>27</td>
-                    </tr>
-                    <tr>
-                        <td>E</td>
-                        <td>Programación</td>
-                        <td>Luis Jose Calderon </td>
-                        <td>35</td>
-                    </tr>
-                    <tr>
-                        <td>F</td>
-                        <td>Redes</td>
-                        <td>No se en velda</td>
-                        <td>37</td>
-                    </tr>
-                    <tr>
-                        <td>G</td>
-                        <td>Multimedia y Artes Gráficas</td>
-                        <td>No se en velda</td>
-                        <td>37</td>
-                    </tr>
+                    <?php
+                        foreach ($courses as $course) {
+                            echo "<tr>";
+                            echo "<a href='asistencia_por_curso.php?course_id=".$course['id']."'>";
+                            echo "<td>".$course['curso']."</td>";
+                            echo "<td>".$course['taller']."</td>";
+                            echo "<td>"."Ninguno ha sido asignado"."</td>";
+                            echo "<td>".$course['student_count']."</td>";
+                            echo "</a>";    
+                            echo "</tr>";
+                        }
+                    ?>
                 </tbody>
                 <tfoot>
                     <tr></tr>

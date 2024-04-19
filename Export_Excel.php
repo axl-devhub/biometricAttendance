@@ -5,18 +5,27 @@ require'connectDB.php';
 $output = '';
 
 if(isset($_POST["To_Excel"])){
-  
+    date_default_timezone_set('America/Santo_Domingo');
     if ( empty($_POST['date_sel'])) {
-
         $Log_date = date("Y-m-d");
+        $Log_date_to = $_POST['date_sel_to'];
+        if (empty($_POST['date_sel_to'])) {
+            $Log_date_to = date("Y-m-d");
+        }
     }
-    else if ( !empty($_POST['date_sel'])) {
-
+    else if ( !empty($_POST['date_sel']) && !empty($_POST['date_sel_to'])) {
         $Log_date = $_POST['date_sel']; 
+        $Log_date_to = $_POST['date_sel_to'];
     }
-        $sql = "SELECT * FROM users_logs WHERE checkindate='$Log_date' ORDER BY id DESC";
-        $result = mysqli_query($conn, $sql);
-        if($result->num_rows > 0){
+    $sql = "SELECT * FROM users_logs WHERE checkindate BETWEEN '$Log_date' AND '$Log_date_to' ORDER BY id DESC";
+    $result = mysqli_stmt_init($conn);
+    if (!mysqli_stmt_prepare($result, $sql)) {
+        echo '<p class="error">SQL Error</p>';
+        exit();
+    }
+    mysqli_stmt_execute($result);
+    $resultl = mysqli_stmt_get_result($result);
+    if (mysqli_num_rows($resultl) > 0){
             $output .= '
                         <table class="table" bordered="1">  
                           <TR>
@@ -32,7 +41,7 @@ if(isset($_POST["To_Excel"])){
                             <TH>Tardanzas</TH>
                             <TH>
                           </TR>';
-              while($row=$result->fetch_assoc()) {
+              while($row=mysqli_fetch_assoc($resultl)) {
                   $output .= '
                               <TR> 
                                   <TD> '.$row['nombre'].'</TD>
@@ -49,13 +58,13 @@ if(isset($_POST["To_Excel"])){
               }
               $output .= '</table>';
               header('Content-Type: application/xls');
-              header('Content-Disposition: attachment; filename=Asistencia'.$Log_date.'.xls');
+              header('Content-Disposition: attachment; filename=Asistencia' .$Log_date. '-'. $Log_date_to .'xls');
               
               echo $output;
               exit();
         }
         else{
-            header( "location: index.php" );
+            header( "location: asistencia.php" );
             exit();
         }
 }
